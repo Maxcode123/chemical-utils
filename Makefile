@@ -1,5 +1,5 @@
 CONFIG=./pyproject.toml
-PY_FILES:=$(shell find src/property_utils -not -path '*/tests/*' -not -name '__init__.py' -name '*.py')
+PY_FILES:=$(shell find src/chemical_utils -not -path '*/tests/*' -not -name '__init__.py' -name '*.py')
 
 install-documentation-builder:
 	$(PIP) install mkdocs mkdocs-material 'mkdocstrings[python]'
