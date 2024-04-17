@@ -1,0 +1,55 @@
+[tool.black]
+line-length = 88
+
+[tool.mypy]
+exclude = "tests"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["chemical_utils*"]
+exclude = ["chemical_utils.tests*"]
+namespaces = false
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chemical-utils"
+version = "0.2.1"
+authors = [
+    { name="Maximos Nikiforakis", email="nikiforos@live.co.uk" },
+]
+description = "Utilities for programming that involves chemical substances and reactions "
+keywords = ["chemical reactions", "chemicals", "chemical substances"]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+dependencies = [
+    "typing-extensions",
+    "property-utils >= 0.2.1, < 1"
+]
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Topic :: Scientific/Engineering :: Chemistry",
+]
+
+[project.optional-dependencies]
+dev = ["unittest-extensions", "black"]
+
+[project.urls]
+Homepage = "https://github.com/Maxcode123/chemical-utils"
+Documentation = "https://maxcode123.github.io/chemical-utils/"
+Issues = "https://github.com/Maxcode123/chemical-utils/issues"
