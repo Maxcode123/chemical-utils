@@ -1,3 +1,4 @@
+from typing import Any
 from unittest import TestSuite, TextTestRunner
 
 from unittest_extensions import args
@@ -5,6 +6,7 @@ from unittest_extensions import args
 from chemical_utils.substances.substance import (
     ChemicalElementTuple,
     ChemicalCompound,
+    ChemicalReactionFactor,
 )
 from chemical_utils.tests.utils import def_load_tests, add_to
 from chemical_utils.tests.data import TESTIUM, PYTHONIUM
@@ -23,6 +25,8 @@ if __name__ == "__main__":
 
 @add_to(substances_test_suite)
 class TestChemicalElementMultiplication(TestSubstances):
+    produced_type = ChemicalElementTuple
+
     def subject(self, other):
         return TESTIUM * other
 
@@ -40,11 +44,13 @@ class TestChemicalElementMultiplication(TestSubstances):
 
     @args({"other": 3})
     def test_with_positive_value(self):
-        self.assert_result("Ts3")
+        self.assert_result("Ts3", type_check=True)
 
 
 @add_to(substances_test_suite)
 class TestChemicalElementRightMultiplication(TestSubstances):
+    produced_type = ChemicalReactionFactor
+
     def subject(self, other):
         return other * TESTIUM
 
@@ -62,40 +68,17 @@ class TestChemicalElementRightMultiplication(TestSubstances):
 
     @args({"other": 3})
     def test_with_positive_value(self):
-        self.assert_result("Ts3")
-
-
-@add_to(substances_test_suite)
-class TestChemicalElementTupleMultiplication(TestSubstances):
-    def subject(self, other):
-        return self.build_list() * other
-
-    def build_list(self):
-        return ChemicalElementTuple(TESTIUM, 2)
-
-    @args({"other": None})
-    def test_with_none(self):
-        self.assert_type_error()
-
-    @args({"other": 0})
-    def test_with_zero(self):
-        self.assert_value_error()
-
-    @args({"other": -1})
-    def test_with_negative_value(self):
-        self.assert_value_error()
-
-    @args({"other": 4})
-    def test_with_positive_value(self):
-        self.assert_result("Ts8")
+        self.assert_result("3Ts", type_check=True)
 
 
 @add_to(substances_test_suite)
 class TestChemicalElementTupleRightMultiplication(TestSubstances):
-    def subject(self, other):
-        return other * self.build_list()
+    produced_type = ChemicalReactionFactor
 
-    def build_list(self):
+    def subject(self, other) -> Any:
+        return other * self.build_tuple()
+
+    def build_tuple(self):
         return ChemicalElementTuple(TESTIUM, 2)
 
     @args({"other": None})
@@ -110,9 +93,9 @@ class TestChemicalElementTupleRightMultiplication(TestSubstances):
     def test_with_negative_value(self):
         self.assert_value_error()
 
-    @args({"other": 4})
+    @args({"other": 3})
     def test_with_positive_value(self):
-        self.assert_result("Ts8")
+        self.assert_result("3Ts2", type_check=True)
 
 
 @add_to(substances_test_suite)
@@ -212,3 +195,30 @@ class TestChemicalCompoundMolecularWeight(TestSubstances):
     )
     def test_with_multiple_element_lists(self):
         self.assertResult(TESTIUM.atomic_mass * 2 + PYTHONIUM.atomic_mass * 3)
+
+
+@add_to(substances_test_suite)
+class TestChemicalCompoundRightMultiplication(TestSubstances):
+    produced_type = ChemicalReactionFactor
+
+    def subject(self, other):
+        return other * self.build_compound()
+
+    def build_compound(self):
+        return ChemicalCompound(TESTIUM, PYTHONIUM)
+
+    @args({"other": None})
+    def test_with_none(self):
+        self.assert_type_error()
+
+    @args({"other": 0})
+    def test_with_zero(self):
+        self.assert_value_error()
+
+    @args({"other": -1})
+    def test_with_negative_value(self):
+        self.assert_value_error()
+
+    @args({"other": 3})
+    def test_with_positive_value(self):
+        self.assert_result("3TsPy", type_check=True)
