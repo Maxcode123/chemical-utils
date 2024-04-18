@@ -2,7 +2,10 @@ from unittest import TestSuite, TextTestRunner
 
 from unittest_extensions import args
 
-from chemical_utils.substances.substance import ChemicalElementList, ChemicalCompound
+from chemical_utils.substances.substance import (
+    ChemicalElementTuple,
+    ChemicalCompound,
+)
 from chemical_utils.tests.utils import def_load_tests, add_to
 from chemical_utils.tests.data import TESTIUM, PYTHONIUM
 from chemical_utils.tests.substances.substance_utils import TestSubstances
@@ -63,12 +66,12 @@ class TestChemicalElementRightMultiplication(TestSubstances):
 
 
 @add_to(substances_test_suite)
-class TestChemicalElementListMultiplication(TestSubstances):
+class TestChemicalElementTupleMultiplication(TestSubstances):
     def subject(self, other):
         return self.build_list() * other
 
     def build_list(self):
-        return ChemicalElementList(TESTIUM, 2)
+        return ChemicalElementTuple(TESTIUM, 2)
 
     @args({"other": None})
     def test_with_none(self):
@@ -88,12 +91,12 @@ class TestChemicalElementListMultiplication(TestSubstances):
 
 
 @add_to(substances_test_suite)
-class TestChemicalElementListRightMultiplication(TestSubstances):
+class TestChemicalElementTupleRightMultiplication(TestSubstances):
     def subject(self, other):
         return other * self.build_list()
 
     def build_list(self):
-        return ChemicalElementList(TESTIUM, 2)
+        return ChemicalElementTuple(TESTIUM, 2)
 
     @args({"other": None})
     def test_with_none(self):
@@ -129,15 +132,15 @@ class TestChemicalCompoundInit(TestSubstances):
     def test_with_multiple_components(self):
         self.assert_result("TsPy")
 
-    @args({"components": (ChemicalElementList(TESTIUM, 2),)})
+    @args({"components": (ChemicalElementTuple(TESTIUM, 2),)})
     def test_with_element_list(self):
         self.assert_result("Ts2")
 
     @args(
         {
             "components": (
-                ChemicalElementList(TESTIUM, 2),
-                ChemicalElementList(TESTIUM, 3),
+                ChemicalElementTuple(TESTIUM, 2),
+                ChemicalElementTuple(TESTIUM, 3),
             )
         }
     )
@@ -147,8 +150,8 @@ class TestChemicalCompoundInit(TestSubstances):
     @args(
         {
             "components": (
-                ChemicalElementList(TESTIUM, 2),
-                ChemicalElementList(PYTHONIUM, 3),
+                ChemicalElementTuple(TESTIUM, 2),
+                ChemicalElementTuple(PYTHONIUM, 3),
             )
         }
     )
@@ -160,7 +163,7 @@ class TestChemicalCompoundInit(TestSubstances):
 
     def test_with_single_element_list(self):
         self.assertSequenceEqual(
-            str(ChemicalCompound(ChemicalElementList(TESTIUM, 2))), "Ts2", str
+            str(ChemicalCompound(ChemicalElementTuple(TESTIUM, 2))), "Ts2", str
         )
 
 
@@ -184,15 +187,15 @@ class TestChemicalCompoundMolecularWeight(TestSubstances):
     def test_with_multiple_components(self):
         self.assertResult(TESTIUM.atomic_mass + PYTHONIUM.atomic_mass)
 
-    @args({"components": (ChemicalElementList(TESTIUM, 2),)})
+    @args({"components": (ChemicalElementTuple(TESTIUM, 2),)})
     def test_with_element_list(self):
         self.assertResult(TESTIUM.atomic_mass * 2)
 
     @args(
         {
             "components": (
-                ChemicalElementList(TESTIUM, 2),
-                ChemicalElementList(TESTIUM, 3),
+                ChemicalElementTuple(TESTIUM, 2),
+                ChemicalElementTuple(TESTIUM, 3),
             )
         }
     )
@@ -202,8 +205,8 @@ class TestChemicalCompoundMolecularWeight(TestSubstances):
     @args(
         {
             "components": (
-                ChemicalElementList(TESTIUM, 2),
-                ChemicalElementList(PYTHONIUM, 3),
+                ChemicalElementTuple(TESTIUM, 2),
+                ChemicalElementTuple(PYTHONIUM, 3),
             )
         }
     )
