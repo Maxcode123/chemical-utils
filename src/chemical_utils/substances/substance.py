@@ -23,7 +23,7 @@ def c(*components) -> "ChemicalCompound":
 class ChemicalSubstance(Protocol):
     """
     A chemical substance is a chemical element or a compound consisting of multiple
-    elements of the same or different atmoms.
+    elements of the same or different atoms.
     """
 
     @property
