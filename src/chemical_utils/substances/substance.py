@@ -1,4 +1,4 @@
-from typing import Protocol, Iterable
+from typing import Protocol, Iterable, TypeAlias, Union
 from dataclasses import dataclass
 
 from chemical_utils.exceptions.base import (
@@ -19,7 +19,6 @@ def c(*components) -> "ChemicalCompound":
     return ChemicalCompound(*components)
 
 
-# pylint: disable=too-few-public-methods
 class ChemicalSubstance(Protocol):
     """
     A chemical substance is a chemical element or a compound consisting of multiple
@@ -32,19 +31,26 @@ class ChemicalSubstance(Protocol):
         Unitless relative molecular mass of the chemical substance.
         """
 
-
-class ChemicalCompoundComponent(Protocol):
-    """
-    Component of a chemical compound.
-    """
-
-    def __mul__(self, other: int) -> "ChemicalElementTuple": ...
-
-    def __rmul__(self, other: int) -> "ChemicalElementTuple": ...
+    def __rmul__(self, coeff: int) -> "ChemicalReactionFactor":
+        """
+        Defines right multiplication between integers and chemical substances.
+        The product is a chemical reaction factor.
+        """
+        if not isinstance(coeff, int):
+            raise ChemicalUtilsTypeError(
+                f"cannot multiply {self.__class__.__name__} with {coeff}; "
+                "expected a positive integer. "
+            )
+        if not coeff > 0:
+            raise ChemicalUtilsValueError(
+                f"cannot multiply {self.__class__.__name__} with {coeff}; "
+                "expected a positive integer. "
+            )
+        return ChemicalReactionFactor(coeff, self)
 
 
 @dataclass(frozen=True)
-class ChemicalElement(ChemicalSubstance, ChemicalCompoundComponent):
+class ChemicalElement(ChemicalSubstance):
     """
     Element of the periodic table.
     """
@@ -63,7 +69,7 @@ class ChemicalElement(ChemicalSubstance, ChemicalCompoundComponent):
     def __mul__(self, other: int) -> "ChemicalElementTuple":
         """
         Defines multiplication between integers and chemical elements.
-        The product is an object that holds the element and its' multiplier.
+        The product is an object that holds the element and its' multiplier.subst
 
         Examples:
             >>> ChemicalElement(1, 1.0080, "H") * 2
@@ -81,17 +87,6 @@ class ChemicalElement(ChemicalSubstance, ChemicalCompoundComponent):
             )
         return ChemicalElementTuple(self, other)
 
-    def __rmul__(self, other: int) -> "ChemicalElementTuple":
-        """
-        Defines right multiplication between integers and chemical elements.
-        The product is an object that holds the element and its' multiplier.
-
-        Examples:
-            >>> 2 * ChemicalElement(1, 1.0080, "H")
-            <ChemicalElementTuple: H2>
-        """
-        return self.__mul__(other)
-
     def __repr__(self) -> str:
         return f"<ChemicalElement: {self.symbol}>"
 
@@ -100,7 +95,7 @@ class ChemicalElement(ChemicalSubstance, ChemicalCompoundComponent):
 
 
 @dataclass(frozen=True)
-class ChemicalElementTuple(ChemicalCompoundComponent):
+class ChemicalElementTuple(ChemicalSubstance):
     """
     Container for a multitude of elements with the same atom.
     """
@@ -108,41 +103,18 @@ class ChemicalElementTuple(ChemicalCompoundComponent):
     element: ChemicalElement
     size: int
 
-    def __mul__(self, other: int) -> "ChemicalElementTuple":
-        """
-        Defines multiplication between integers and chemical element lists.
-
-        Examples:
-            >>> ChemicalElementTuple(ChemicalElement(1, 1.0080, "H"), 2) * 2
-            <ChemicalElementTuple: H4>
-        """
-        if not isinstance(other, int):
-            raise ChemicalUtilsTypeError(
-                f"cannot multiply ChemicalElementTuple with {other}; "
-                "expected a positive integer. "
-            )
-        if not other > 0:
-            raise ChemicalUtilsValueError(
-                f"cannot multiply ChemicalElementTuple with {other}; "
-                "expected a positive integer. "
-            )
-        return ChemicalElementTuple(self.element, self.size * other)
-
-    def __rmul__(self, other: int) -> "ChemicalElementTuple":
-        """
-        Defines right multiplication between integers and chemical elements lists.
-
-        Examples:
-            >>> 2 * ChemicalElementTuple(ChemicalElement(1, 1.0080, "H"), 2)
-            <ChemicalElementTuple: H4>
-        """
-        return self.__mul__(other)
+    @property
+    def molecular_weight(self) -> float:
+        return self.element.molecular_weight * self.size
 
     def __repr__(self) -> str:
         return f"<ChemicalElementTuple: {self.element}{self.size}>"
 
     def __str__(self) -> str:
         return f"{self.element}{self.size}"
+
+
+ChemicalCompoundComponent: TypeAlias = Union[ChemicalElement, ChemicalElementTuple]
 
 
 @dataclass(frozen=True)
@@ -171,10 +143,7 @@ class ChemicalCompound(ChemicalSubstance):
         """
         mw = 0.0
         for component in self.components:
-            if isinstance(component, ChemicalElementTuple):
-                mw += component.element.molecular_weight * component.size
-            elif isinstance(component, ChemicalElement):
-                mw += component.molecular_weight
+            mw += component.molecular_weight
         return mw
 
     def __repr__(self) -> str:
@@ -182,3 +151,27 @@ class ChemicalCompound(ChemicalSubstance):
 
     def __str__(self) -> str:
         return "".join(str(c) for c in self.components)
+
+
+@dataclass(frozen=True)
+class ChemicalReactionFactor:
+    """
+    A factor is either a reactant or a product in a chemical reaction.
+    """
+
+    stoichiometric_coefficient: int
+    substance: ChemicalSubstance
+
+    def __add__(
+        self, other: "ChemicalReactionFactor"
+    ) -> Iterable["ChemicalReactionFactor"]: ...
+
+    def __radd__(
+        self, other: Iterable["ChemicalReactionFactor"]
+    ) -> Iterable["ChemicalReactionFactor"]: ...
+
+    def __repr__(self) -> str:
+        return f"<ChemicalReactionFactor: {str(self)}>"
+
+    def __str__(self) -> str:
+        return f"{self.stoichiometric_coefficient}{self.substance}"
