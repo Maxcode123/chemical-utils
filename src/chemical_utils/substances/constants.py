@@ -126,7 +126,7 @@ BARIUM = ChemicalElement(56, 137.33, "Ba")
 HAFNIUM = ChemicalElement(72, 178.49, "Hf")
 TANTALUM = ChemicalElement(73, 180.9479, "Ta")
 
-HYDROGEN2 = ChemicalCompound(HYDROGEN * 2)
+HYDROGEN2 = HYDROGEN * 2
 WATER = ChemicalCompound(HYDROGEN * 2, OXYGEN)
 CARBON_MONOXIDE = ChemicalCompound(CARBON, OXYGEN)
 CARBON_DIOXIDE = ChemicalCompound(CARBON, OXYGEN * 2)
