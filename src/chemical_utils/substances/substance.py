@@ -44,7 +44,7 @@ class ChemicalCompoundComponent(Protocol):
 
 
 @dataclass(frozen=True)
-class ChemicalElement:
+class ChemicalElement(ChemicalSubstance, ChemicalCompoundComponent):
     """
     Element of the periodic table.
     """
@@ -146,7 +146,7 @@ class ChemicalElementTuple(ChemicalCompoundComponent):
 
 
 @dataclass(frozen=True)
-class ChemicalCompound:
+class ChemicalCompound(ChemicalSubstance):
     """
     A chemical compound can contain any number of chemical components.
     """
