@@ -38,9 +38,9 @@ class ChemicalCompoundComponent(Protocol):
     Component of a chemical compound.
     """
 
-    def __mul__(self, other: int) -> "ChemicalElementList": ...
+    def __mul__(self, other: int) -> "ChemicalElementTuple": ...
 
-    def __rmul__(self, other: int) -> "ChemicalElementList": ...
+    def __rmul__(self, other: int) -> "ChemicalElementTuple": ...
 
 
 @dataclass(frozen=True)
@@ -60,14 +60,14 @@ class ChemicalElement:
         """
         return self.atomic_mass
 
-    def __mul__(self, other: int) -> "ChemicalElementList":
+    def __mul__(self, other: int) -> "ChemicalElementTuple":
         """
         Defines multiplication between integers and chemical elements.
         The product is an object that holds the element and its' multiplier.
 
         Examples:
             >>> ChemicalElement(1, 1.0080, "H") * 2
-            <ChemicalElementList: H2>
+            <ChemicalElementTuple: H2>
         """
         if not isinstance(other, int):
             raise ChemicalUtilsTypeError(
@@ -79,16 +79,16 @@ class ChemicalElement:
                 f"cannot multiply ChemicalElement with {other}; "
                 "expected a positive integer. "
             )
-        return ChemicalElementList(self, other)
+        return ChemicalElementTuple(self, other)
 
-    def __rmul__(self, other: int) -> "ChemicalElementList":
+    def __rmul__(self, other: int) -> "ChemicalElementTuple":
         """
         Defines right multiplication between integers and chemical elements.
         The product is an object that holds the element and its' multiplier.
 
         Examples:
             >>> 2 * ChemicalElement(1, 1.0080, "H")
-            <ChemicalElementList: H2>
+            <ChemicalElementTuple: H2>
         """
         return self.__mul__(other)
 
@@ -100,49 +100,49 @@ class ChemicalElement:
 
 
 @dataclass(frozen=True)
-class ChemicalElementList:
+class ChemicalElementTuple(ChemicalCompoundComponent):
     """
     Container for a multitude of elements with the same atom.
     """
 
     element: ChemicalElement
-    number_of_elements: int
+    size: int
 
-    def __mul__(self, other: int) -> "ChemicalElementList":
+    def __mul__(self, other: int) -> "ChemicalElementTuple":
         """
         Defines multiplication between integers and chemical element lists.
 
         Examples:
-            >>> ChemicalElementList(ChemicalElement(1, 1.0080, "H"), 2) * 2
-            <ChemicalElementList: H4>
+            >>> ChemicalElementTuple(ChemicalElement(1, 1.0080, "H"), 2) * 2
+            <ChemicalElementTuple: H4>
         """
         if not isinstance(other, int):
             raise ChemicalUtilsTypeError(
-                f"cannot multiply ChemicalElementList with {other}; "
+                f"cannot multiply ChemicalElementTuple with {other}; "
                 "expected a positive integer. "
             )
         if not other > 0:
             raise ChemicalUtilsValueError(
-                f"cannot multiply ChemicalElementList with {other}; "
+                f"cannot multiply ChemicalElementTuple with {other}; "
                 "expected a positive integer. "
             )
-        return ChemicalElementList(self.element, self.number_of_elements * other)
+        return ChemicalElementTuple(self.element, self.size * other)
 
-    def __rmul__(self, other: int) -> "ChemicalElementList":
+    def __rmul__(self, other: int) -> "ChemicalElementTuple":
         """
         Defines right multiplication between integers and chemical elements lists.
 
         Examples:
-            >>> 2 * ChemicalElementList(ChemicalElement(1, 1.0080, "H"), 2)
-            <ChemicalElementList: H4>
+            >>> 2 * ChemicalElementTuple(ChemicalElement(1, 1.0080, "H"), 2)
+            <ChemicalElementTuple: H4>
         """
         return self.__mul__(other)
 
     def __repr__(self) -> str:
-        return f"<ChemicalElementList: {self.element}{self.number_of_elements}>"
+        return f"<ChemicalElementTuple: {self.element}{self.size}>"
 
     def __str__(self) -> str:
-        return f"{self.element}{self.number_of_elements}"
+        return f"{self.element}{self.size}"
 
 
 @dataclass(frozen=True)
@@ -171,8 +171,8 @@ class ChemicalCompound:
         """
         mw = 0.0
         for component in self.components:
-            if isinstance(component, ChemicalElementList):
-                mw += component.element.molecular_weight * component.number_of_elements
+            if isinstance(component, ChemicalElementTuple):
+                mw += component.element.molecular_weight * component.size
             elif isinstance(component, ChemicalElement):
                 mw += component.molecular_weight
         return mw
