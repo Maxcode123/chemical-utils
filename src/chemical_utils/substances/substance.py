@@ -1,4 +1,9 @@
-from typing import Protocol, Iterable, TypeAlias, Union
+from typing import Protocol, Iterable, Union, List
+
+try:
+    from typing import TypeAlias  # Python >= 3.10
+except ImportError:
+    from typing_extensions import TypeAlias  # Python < 3.10
 from dataclasses import dataclass
 
 from chemical_utils.exceptions.base import (
@@ -31,6 +36,23 @@ class ChemicalSubstance(Protocol):
         Unitless relative molecular mass of the chemical substance.
         """
 
+    def __add__(self, other: "ChemicalSubstance") -> "ChemicalReactionOperand":
+        """
+        Defines addition for chemical elements.
+        """
+        if not isinstance(
+            other, (ChemicalElement, ChemicalElementTuple, ChemicalCompound)
+        ):
+            raise ChemicalUtilsTypeError(
+                f"cannot add {other} to self; expected a ChemicalSubstance"
+            )
+        return ChemicalReactionOperand(
+            [
+                ChemicalReactionFactor(substance=self),
+                ChemicalReactionFactor(substance=other),
+            ]
+        )
+
     def __rmul__(self, coeff: int) -> "ChemicalReactionFactor":
         """
         Defines right multiplication between integers and chemical substances.
@@ -46,7 +68,7 @@ class ChemicalSubstance(Protocol):
                 f"cannot multiply {self.__class__.__name__} with {coeff}; "
                 "expected a positive integer. "
             )
-        return ChemicalReactionFactor(coeff, self)
+        return ChemicalReactionFactor(self, coeff)
 
 
 @dataclass(frozen=True)
@@ -159,19 +181,43 @@ class ChemicalReactionFactor:
     A factor is either a reactant or a product in a chemical reaction.
     """
 
-    stoichiometric_coefficient: int
     substance: ChemicalSubstance
+    stoichiometric_coefficient: int = 1
 
-    def __add__(
-        self, other: "ChemicalReactionFactor"
-    ) -> Iterable["ChemicalReactionFactor"]: ...
-
-    def __radd__(
-        self, other: Iterable["ChemicalReactionFactor"]
-    ) -> Iterable["ChemicalReactionFactor"]: ...
+    def __add__(self, other: "ChemicalReactionFactor") -> "ChemicalReactionOperand":
+        return ChemicalReactionOperand([self, other])
 
     def __repr__(self) -> str:
         return f"<ChemicalReactionFactor: {str(self)}>"
 
     def __str__(self) -> str:
-        return f"{self.stoichiometric_coefficient}{self.substance}"
+        if self.stoichiometric_coefficient > 1:
+            return f"{self.stoichiometric_coefficient}{self.substance}"
+        return f"{self.substance}"
+
+
+@dataclass(frozen=True)
+class ChemicalReactionOperand:
+    """
+    A chemical reaction operand contains a number of chemical reaction factors.
+    The operand can either be the reactants or the products of a chemical reaction.
+    """
+
+    factors: List[ChemicalReactionFactor]
+
+    def __add__(self, other: ChemicalReactionFactor) -> "ChemicalReactionOperand":
+        if isinstance(other, (ChemicalElement, ChemicalElementTuple, ChemicalCompound)):
+            other = ChemicalReactionFactor(other)
+
+        if not isinstance(other, ChemicalReactionFactor):
+            raise ChemicalUtilsTypeError(
+                f"cannot add {other} to {self}; expected a ChemicalReactionFactor. "
+            )
+
+        return ChemicalReactionOperand(self.factors + [other])
+
+    def __repr__(self) -> str:
+        return f"<ChemicalReactionOperand: {str(self)}>"
+
+    def __str__(self) -> str:
+        return " + ".join(map(str, self.factors))

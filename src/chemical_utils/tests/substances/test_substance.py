@@ -7,9 +7,17 @@ from chemical_utils.substances.substance import (
     ChemicalElementTuple,
     ChemicalCompound,
     ChemicalReactionFactor,
+    ChemicalReactionOperand,
 )
 from chemical_utils.tests.utils import def_load_tests, add_to
-from chemical_utils.tests.data import TESTIUM, PYTHONIUM
+from chemical_utils.tests.data import (
+    TESTIUM,
+    PYTHONIUM,
+    PYTHONIUM3,
+    TS_PY_AN,
+    TESTIUM2,
+    ANACONDIUM,
+)
 from chemical_utils.tests.substances.substance_utils import TestSubstances
 
 
@@ -72,6 +80,34 @@ class TestChemicalElementRightMultiplication(TestSubstances):
 
 
 @add_to(substances_test_suite)
+class TestChemicalElementAddition(TestSubstances):
+    produced_type = ChemicalReactionOperand
+
+    def subject(self, other):
+        return TESTIUM + other
+
+    def assert_result(self, result_str):
+        super().assert_result(result_str, type_check=True)
+        self.assertEqual(len(self.cachedResult().factors), 2)
+
+    @args({"other": 2})
+    def test_with_numeric(self):
+        self.assert_type_error()
+
+    @args({"other": PYTHONIUM})
+    def test_with_element(self):
+        self.assert_result("Ts + Py")
+
+    @args({"other": PYTHONIUM3})
+    def test_with_element_tuple(self):
+        self.assert_result("Ts + Py3")
+
+    @args({"other": TS_PY_AN})
+    def test_with_compound(self):
+        self.assert_result("Ts + TsPyAn")
+
+
+@add_to(substances_test_suite)
 class TestChemicalElementTupleRightMultiplication(TestSubstances):
     produced_type = ChemicalReactionFactor
 
@@ -96,6 +132,34 @@ class TestChemicalElementTupleRightMultiplication(TestSubstances):
     @args({"other": 3})
     def test_with_positive_value(self):
         self.assert_result("3Ts2", type_check=True)
+
+
+@add_to(substances_test_suite)
+class TestChemicalElementTupleAddition(TestSubstances):
+    produced_type = ChemicalReactionOperand
+
+    def subject(self, other) -> Any:
+        return TESTIUM2 + other
+
+    def assert_result(self, result_str):
+        super().assert_result(result_str, type_check=True)
+        self.assertEqual(len(self.cachedResult().factors), 2)
+
+    @args({"other": 2})
+    def test_with_numeric(self):
+        self.assert_type_error()
+
+    @args({"other": PYTHONIUM})
+    def test_with_element(self):
+        self.assert_result("Ts2 + Py")
+
+    @args({"other": PYTHONIUM3})
+    def test_with_element_tuple(self):
+        self.assert_result("Ts2 + Py3")
+
+    @args({"other": TS_PY_AN})
+    def test_with_compound(self):
+        self.assert_result("Ts2 + TsPyAn")
 
 
 @add_to(substances_test_suite)
@@ -222,3 +286,64 @@ class TestChemicalCompoundRightMultiplication(TestSubstances):
     @args({"other": 3})
     def test_with_positive_value(self):
         self.assert_result("3TsPy", type_check=True)
+
+
+@add_to(substances_test_suite)
+class TestChemicalCompoundAddition(TestSubstances):
+    produced_type = ChemicalReactionOperand
+
+    def subject(self, other) -> Any:
+        return TS_PY_AN + other
+
+    def assert_result(self, result_str):
+        super().assert_result(result_str, type_check=True)
+        self.assertEqual(len(self.cachedResult().factors), 2)
+
+    @args({"other": 3})
+    def test_with_numeric(self):
+        self.assert_type_error()
+
+    @args({"other": TESTIUM})
+    def test_with_element(self):
+        self.assert_result("TsPyAn + Ts")
+
+    @args({"other": TESTIUM2})
+    def test_with_element_tuple(self):
+        self.assert_result("TsPyAn + Ts2")
+
+    @args({"other": TS_PY_AN})
+    def test_with_compound(self):
+        self.assert_result("TsPyAn + TsPyAn")
+
+
+@add_to(substances_test_suite)
+class TestChemicalReactionOperandAddition(TestSubstances):
+    produced_type = ChemicalReactionOperand
+
+    def subject(self, other) -> Any:
+        return self.build_operand() + other
+
+    def build_operand(self):
+        return ChemicalReactionOperand(
+            [ChemicalReactionFactor(TESTIUM), ChemicalReactionFactor(PYTHONIUM)]
+        )
+
+    def assert_result(self, result_str):
+        super().assert_result(result_str, type_check=True)
+        self.assertEqual(len(self.cachedResult().factors), 3)
+
+    @args({"other": 3})
+    def test_with_numeric(self):
+        self.assert_type_error()
+
+    @args({"other": ANACONDIUM})
+    def test_with_element(self):
+        self.assert_result("Ts + Py + An")
+
+    @args({"other": PYTHONIUM3})
+    def test_with_element_tuple(self):
+        self.assert_result("Ts + Py + Py3")
+
+    @args({"other": TS_PY_AN})
+    def test_with_compound(self):
+        self.assert_result("Ts + Py + TsPyAn")
