@@ -60,6 +60,7 @@ __all__ = [
     "HAFNIUM",
     "TANTALUM",
     "HYDROGEN2",
+    "OXYGEN2",
     "WATER",
     "CARBON_MONOXIDE",
     "CARBON_DIOXIDE",
@@ -127,6 +128,7 @@ HAFNIUM = ChemicalElement(72, 178.49, "Hf")
 TANTALUM = ChemicalElement(73, 180.9479, "Ta")
 
 HYDROGEN2 = HYDROGEN * 2
+OXYGEN2 = OXYGEN * 2
 WATER = ChemicalCompound(HYDROGEN * 2, OXYGEN)
 CARBON_MONOXIDE = ChemicalCompound(CARBON, OXYGEN)
 CARBON_DIOXIDE = ChemicalCompound(CARBON, OXYGEN * 2)
