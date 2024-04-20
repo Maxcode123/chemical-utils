@@ -1,4 +1,4 @@
-from typing import Protocol, Iterable, Union, List
+from typing import Protocol, Iterable, Union, List, Iterator
 
 try:
     from typing import TypeAlias  # Python >= 3.10
@@ -215,6 +215,9 @@ class ChemicalReactionOperand:
             )
 
         return ChemicalReactionOperand(self.factors + [other])
+
+    def __iter__(self) -> Iterator[ChemicalReactionFactor]:
+        return self.factors.__iter__()
 
     def __repr__(self) -> str:
         return f"<ChemicalReactionOperand: {str(self)}>"
