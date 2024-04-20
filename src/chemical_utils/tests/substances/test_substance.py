@@ -111,6 +111,16 @@ class TestChemicalElementAddition(TestSubstances):
 
 
 @add_to(substances_test_suite)
+class TestChemicalElementElements(TestSubstances):
+    def subject(self, element):
+        return [e for e in element.elements()]
+
+    @args({"element": TESTIUM})
+    def test_elements(self):
+        self.assertResultList([TESTIUM])
+
+
+@add_to(substances_test_suite)
 class TestChemicalElementTupleRightMultiplication(TestSubstances):
     produced_type = ChemicalReactionFactor
 
@@ -163,6 +173,16 @@ class TestChemicalElementTupleAddition(TestSubstances):
     @args({"other": TS_PY_AN})
     def test_with_compound(self):
         self.assert_result("Ts2 + TsPyAn")
+
+
+@add_to(substances_test_suite)
+class TestChemicalElementTupleElements(TestSubstances):
+    def subject(self, substance):
+        return [e for e in substance.elements()]
+
+    @args({"substance": TESTIUM2})
+    def test_elements(self):
+        self.assertResultList([TESTIUM, TESTIUM])
 
 
 @add_to(substances_test_suite)
@@ -317,6 +337,79 @@ class TestChemicalCompoundAddition(TestSubstances):
     @args({"other": TS_PY_AN})
     def test_with_compound(self):
         self.assert_result("TsPyAn + TsPyAn")
+
+
+@add_to(substances_test_suite)
+class TestChemicalCompoundElements(TestSubstances):
+    def subject(self, compound):
+        return [e for e in compound.elements()]
+
+    @args({"compound": TS_PY_AN})
+    def test_elements(self):
+        self.assertResultList([TESTIUM, PYTHONIUM, ANACONDIUM])
+
+
+@add_to(substances_test_suite)
+class TestChemicalReactionFactorAddition(TestSubstances):
+    produced_type = ChemicalReactionOperand
+
+    def subject(self, other) -> Any:
+        return self.build_factor() + other
+
+    def build_factor(self):
+        return f(TESTIUM2)
+
+    @args({"other": 1})
+    def test_with_numeric(self):
+        self.assert_type_error()
+
+    @args({"other": TESTIUM})
+    def test_with_element(self):
+        self.assert_type_error()
+
+    @args({"other": TESTIUM2})
+    def test_with_element_tuple(self):
+        self.assert_type_error()
+
+    @args({"other": TS_PY_AN})
+    def test_with_compound(self):
+        self.assert_type_error()
+
+    @args({"other": f(PYTHONIUM)})
+    def test_with_factor(self):
+        self.assert_result("Ts2 + Py")
+
+
+@add_to(substances_test_suite)
+class TestChemicalReactionFactorStoichiometricElements(TestSubstances):
+    def subject(self, factor):
+        return [e for e in factor.stoichiometric_elements()]
+
+    @args({"factor": f(TESTIUM)})
+    def test_with_single_element(self):
+        self.assertResultList([TESTIUM])
+
+    @args({"factor": f(TESTIUM, 2)})
+    def test_with_element_and_coefficient(self):
+        self.assertResultList([TESTIUM, TESTIUM])
+
+    @args({"factor": f(TESTIUM2)})
+    def test_with_element_tuple(self):
+        self.assertResultList([TESTIUM, TESTIUM])
+
+    @args({"factor": f(TESTIUM2, 2)})
+    def test_with_element_tuple_and_coefficient(self):
+        self.assertResultList([TESTIUM] * 4)
+
+    @args({"factor": f(TS_PY_AN)})
+    def test_with_compound(self):
+        self.assertResultList([TESTIUM, PYTHONIUM, ANACONDIUM])
+
+    @args({"factor": f(TS_PY_AN, 2)})
+    def test_with_compound_and_coefficient(self):
+        self.assertResultList(
+            [TESTIUM, TESTIUM, PYTHONIUM, PYTHONIUM, ANACONDIUM, ANACONDIUM]
+        )
 
 
 @add_to(substances_test_suite)

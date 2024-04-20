@@ -58,3 +58,21 @@ class TestChemicalOperandAddition(TestApi):
         self.assert_result(
             METHANE + WATER + CARBON_MONOXIDE + HYDROGEN2, "CH4 + H2O + CO + H2"
         )
+
+
+class TestChemicalReactionOperandIter(TestApi):
+    def test_iterate_over_operand(self):
+        self.assertEqual([f for f in (METHANE + OXYGEN2)], [1 * METHANE, 1 * OXYGEN2])
+
+
+class TestChemicalReactionFactorIter(TestApi):
+    def test_iterate_over_factor(self):
+        self.assertEqual(
+            [e for e in (2 * CARBON_MONOXIDE).stoichiometric_elements()],
+            [CARBON, CARBON, OXYGEN, OXYGEN],
+        )
+
+
+class TestChemicalCompoundIter(TestApi):
+    def test_iterate_over_compound(self):
+        self.assertEqual([e for e in METHANE.elements()], [CARBON] + [HYDROGEN] * 4)
