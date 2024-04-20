@@ -36,6 +36,11 @@ class ChemicalSubstance(Protocol):
         Unitless relative molecular mass of the chemical substance.
         """
 
+    def elements(self) -> Iterator["ChemicalElement"]:
+        """
+        Returns an iterator over the chemical elements of this substance.
+        """
+
     def __add__(self, other: "ChemicalSubstance") -> "ChemicalReactionOperand":
         """
         Defines addition for chemical elements.
@@ -88,6 +93,17 @@ class ChemicalElement(ChemicalSubstance):
         """
         return self.atomic_mass
 
+    def elements(self) -> Iterator["ChemicalElement"]:
+        """
+        Return an iterator over this chemical element.
+
+        Examples:
+            >>> from chemical_utils.substances import SODIUM
+            >>> [e for e in SODIUM.elements()]
+            [<ChemicalElement: Na>]
+        """
+        return iter([self])
+
     def __mul__(self, other: int) -> "ChemicalElementTuple":
         """
         Defines multiplication between integers and chemical elements.
@@ -129,6 +145,17 @@ class ChemicalElementTuple(ChemicalSubstance):
     def molecular_weight(self) -> float:
         return self.element.molecular_weight * self.size
 
+    def elements(self) -> Iterator[ChemicalElement]:
+        """
+        Returns an iterator over the elements of this tuple.
+
+        Examples:
+            >>> from chemical_utils.substances import OXYGEN2
+            >>> [e for e in OXYGEN2.elements()]
+            [<ChemicalElement: O>, <ChemicalElement: O>]
+        """
+        return iter([self.element] * self.size)
+
     def __repr__(self) -> str:
         return f"<ChemicalElementTuple: {self.element}{self.size}>"
 
@@ -168,6 +195,20 @@ class ChemicalCompound(ChemicalSubstance):
             mw += component.molecular_weight
         return mw
 
+    def elements(self) -> Iterator[ChemicalElement]:
+        """
+        Returns an iterator over the chemical elements of this compound.
+
+        Examples:
+            >>> from chemical_utils.substances import METHANE
+            >>> [e for e in METHANE.elements()]
+            [<ChemicalElement: C>, <ChemicalElement: H>, <ChemicalElement: H>, <ChemicalElement: H>, <ChemicalElement: H>]
+        """
+        _elements = [
+            element for component in self.components for element in component.elements()
+        ]
+        return iter(_elements)
+
     def __repr__(self) -> str:
         return f"<ChemicalCompound: {''.join(str(c) for c in self.components)}>"
 
@@ -184,7 +225,32 @@ class ChemicalReactionFactor:
     substance: ChemicalSubstance
     stoichiometric_coefficient: int = 1
 
+    def stoichiometric_elements(self) -> Iterator[ChemicalElement]:
+        """
+        Iterate over the elements of this factor taking into account the stoichiometric
+        coefficient.
+
+        Example:
+            >>> from chemical_utils.substances import HYDROGEN2
+            >>> [e for e in (2*HYDROGEN2).stoichiometric_elements()]
+            [<ChemicalElement: H>, <ChemicalElement: H>, <ChemicalElement: H>, <ChemicalElement: H>]
+        """
+        if self.stoichiometric_coefficient == 1:
+            return self.substance.elements()
+
+        _elements: List[ChemicalElement] = []
+        _ = {
+            _elements.extend([e] * self.stoichiometric_coefficient)  # type: ignore
+            for e in self.substance.elements()
+        }
+
+        return iter(_elements)
+
     def __add__(self, other: "ChemicalReactionFactor") -> "ChemicalReactionOperand":
+        if not isinstance(other, ChemicalReactionFactor):
+            raise ChemicalUtilsTypeError(
+                f"cannot add {other} to {self}; expected ChemicalReactionFactor. "
+            )
         return ChemicalReactionOperand([self, other])
 
     def __repr__(self) -> str:
