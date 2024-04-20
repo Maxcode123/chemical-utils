@@ -247,6 +247,9 @@ class ChemicalReactionFactor:
         return iter(_elements)
 
     def __add__(self, other: "ChemicalReactionFactor") -> "ChemicalReactionOperand":
+        if isinstance(other, (ChemicalElement, ChemicalElementTuple, ChemicalCompound)):
+            other = ChemicalReactionFactor(other)
+
         if not isinstance(other, ChemicalReactionFactor):
             raise ChemicalUtilsTypeError(
                 f"cannot add {other} to {self}; expected ChemicalReactionFactor. "
