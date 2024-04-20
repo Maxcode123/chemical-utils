@@ -20,6 +20,9 @@ from chemical_utils.tests.data import (
 )
 from chemical_utils.tests.substances.substance_utils import TestSubstances
 
+# aliases used for testing
+f = ChemicalReactionFactor
+op = ChemicalReactionOperand
 
 load_tests = def_load_tests("chemical_utils.substances.substance")
 
@@ -324,9 +327,7 @@ class TestChemicalReactionOperandAddition(TestSubstances):
         return self.build_operand() + other
 
     def build_operand(self):
-        return ChemicalReactionOperand(
-            [ChemicalReactionFactor(TESTIUM), ChemicalReactionFactor(PYTHONIUM)]
-        )
+        return op([f(TESTIUM), f(PYTHONIUM)])
 
     def assert_result(self, result_str):
         super().assert_result(result_str, type_check=True)
@@ -347,3 +348,29 @@ class TestChemicalReactionOperandAddition(TestSubstances):
     @args({"other": TS_PY_AN})
     def test_with_compound(self):
         self.assert_result("Ts + Py + TsPyAn")
+
+
+@add_to(substances_test_suite)
+class TestChemicalReactionOperandIteration(TestSubstances):
+    def subject(self, operand):
+        return [factor for factor in operand]
+
+    @args({"operand": op([f(TESTIUM)])})
+    def test_with_one_element(self):
+        self.assertResultList([f(TESTIUM)])
+
+    @args({"operand": op([f(TESTIUM), f(PYTHONIUM)])})
+    def test_with_two_element(self):
+        self.assertResultList([f(TESTIUM), f(PYTHONIUM)])
+
+    @args({"operand": op([f(TESTIUM2)])})
+    def test_with_element_tuple(self):
+        self.assertResultList([f(TESTIUM2)])
+
+    @args({"operand": op([f(TESTIUM2), f(PYTHONIUM3)])})
+    def test_with_element_tuples(self):
+        self.assertResultList([f(TESTIUM2), f(PYTHONIUM3)])
+
+    @args({"operand": op([f(TS_PY_AN)])})
+    def test_with_compound(self):
+        self.assertResultList([f(TS_PY_AN)])
