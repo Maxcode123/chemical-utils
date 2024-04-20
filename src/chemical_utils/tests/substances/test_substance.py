@@ -365,15 +365,15 @@ class TestChemicalReactionFactorAddition(TestSubstances):
 
     @args({"other": TESTIUM})
     def test_with_element(self):
-        self.assert_type_error()
+        self.assert_result("Ts2 + Ts")
 
     @args({"other": TESTIUM2})
     def test_with_element_tuple(self):
-        self.assert_type_error()
+        self.assert_result("Ts2 + Ts2")
 
     @args({"other": TS_PY_AN})
     def test_with_compound(self):
-        self.assert_type_error()
+        self.assert_result("Ts2 + TsPyAn")
 
     @args({"other": f(PYTHONIUM)})
     def test_with_factor(self):
