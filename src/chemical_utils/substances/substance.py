@@ -41,22 +41,21 @@ class ChemicalSubstance(Protocol):
         Returns an iterator over the chemical elements of this substance.
         """
 
-    def __add__(self, other: "ChemicalSubstance") -> "ChemicalReactionOperand":
+    def __add__(
+        self, other: Union["ChemicalSubstance", "ChemicalReactionFactor"]
+    ) -> "ChemicalReactionOperand":
         """
         Defines addition for chemical elements.
         """
-        if not isinstance(
-            other, (ChemicalElement, ChemicalElementTuple, ChemicalCompound)
-        ):
+        if isinstance(other, (ChemicalElement, ChemicalElementTuple, ChemicalCompound)):
+            other = ChemicalReactionFactor(substance=other)
+
+        if not isinstance(other, ChemicalReactionFactor):
             raise ChemicalUtilsTypeError(
-                f"cannot add {other} to self; expected a ChemicalSubstance"
+                f"cannot add {other} to {self}; expected a ChemicalSubstance"
             )
-        return ChemicalReactionOperand(
-            [
-                ChemicalReactionFactor(substance=self),
-                ChemicalReactionFactor(substance=other),
-            ]
-        )
+
+        return ChemicalReactionOperand([ChemicalReactionFactor(substance=self), other])
 
     def __rmul__(self, coeff: int) -> "ChemicalReactionFactor":
         """
