@@ -1,4 +1,4 @@
-from typing import Protocol, Iterable, Union, List, Iterator
+from typing import Protocol, Iterable, Union, List, Iterator, Optional
 
 try:
     from typing import TypeAlias  # Python >= 3.10
@@ -9,6 +9,16 @@ from dataclasses import dataclass
 from chemical_utils.exceptions.base import (
     ChemicalUtilsTypeError,
     ChemicalUtilsValueError,
+)
+from chemical_utils.properties.properties import (
+    FormationProperties,
+    CriticalProperties,
+    Entropy,
+)
+from chemical_utils.properties.registry import (
+    get_critical_properties,
+    get_standard_formation_properties,
+    get_standard_entropy,
 )
 
 
@@ -35,6 +45,27 @@ class ChemicalSubstance(Protocol):
         """
         Unitless relative molecular mass of the chemical substance.
         """
+
+    @property
+    def standard_formation_properties(self) -> Optional[FormationProperties]:
+        """
+        Enthalpy and free energy of formation at 25 Celcius.
+        """
+        return get_standard_formation_properties(self)
+
+    @property
+    def standard_entropy(self) -> Optional[Entropy]:
+        """
+        Entropy of substance at 25 Celcius.
+        """
+        return get_standard_entropy(self)
+
+    @property
+    def critical_properties(self) -> Optional[CriticalProperties]:
+        """
+        Critical temperature, pressure and volume.
+        """
+        return get_critical_properties(self)
 
     def elements(self) -> Iterator["ChemicalElement"]:
         """
@@ -175,7 +206,7 @@ class ChemicalCompound(ChemicalSubstance):
 
     def __init__(self, *components) -> None:
         try:
-            _components = list(components)
+            _components = tuple(components)
         except Exception as exc:
             raise ChemicalUtilsTypeError(
                 f"cannot create ChemicalCompound from {components}; "
