@@ -1,6 +1,13 @@
 from chemical_utils.substances import *
 from chemical_utils.tests.base import TestBase
 
+from chemical_utils.properties.properties import (
+    Temperature,
+    Pressure,
+    MolarVolume,
+    MolarEnergy,
+)
+
 
 class TestApi(TestBase):
     def assert_result(self, subject, result_str):
@@ -76,3 +83,25 @@ class TestChemicalReactionFactorIter(TestApi):
 class TestChemicalCompoundIter(TestApi):
     def test_iterate_over_compound(self):
         self.assertEqual([e for e in METHANE.elements()], [CARBON] + [HYDROGEN] * 4)
+
+
+class TestChemicalSubstanceProperties(TestApi):
+    def test_compound_critical_temperature(self):
+        self.assertEqual(HYDROGEN2.critical_properties.temperature, Temperature(33.19))
+
+    def test_compound_critical_pressure(self):
+        self.assertEqual(HYDROGEN2.critical_properties.pressure, Pressure(13.13))
+
+    def test_compound_critical_volume(self):
+        self.assertEqual(HYDROGEN2.critical_properties.volume, MolarVolume(0.064147))
+
+    def test_compound_formation_enthalpy(self):
+        self.assertEqual(
+            METHANE.standard_formation_properties.enthalpy, MolarEnergy(-7.452e7)
+        )
+
+    def test_compound_formation_gibbs_energy(self):
+        self.assertEqual(
+            METHANE.standard_formation_properties.gibbs_energy,
+            MolarEnergy(-5.049e7),
+        )
