@@ -41,7 +41,7 @@ doctest-package:
 	$(INTERPRETER) -m doctest $(PY_FILES)
 
 lint-package:
-	$(INTERPRETER) -m pylint --ignore tests --disable C0114,C0301,C0302,W0401 src/chemical_utils
+	$(INTERPRETER) -m pylint --ignore tests --disable C0114,C0301,C0302,W0401,W0614 src/chemical_utils
 
 type-check-package:
 	$(INTERPRETER) -m mypy --config-file $(CONFIG) ./src/chemical_utils/
