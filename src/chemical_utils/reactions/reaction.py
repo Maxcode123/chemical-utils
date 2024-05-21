@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from typing import Optional
+from functools import cached_property
 
 from typing_extensions import Counter
 
@@ -11,6 +13,7 @@ from chemical_utils.substances.substance import (
 )
 from chemical_utils.exceptions.base import ChemicalUtilsTypeError
 from chemical_utils.exceptions.reactions.reaction import UnbalancedChemicalReactionError
+from chemical_utils.properties.properties import MolarEnergy, Entropy
 
 
 def r(
@@ -48,6 +51,85 @@ class ChemicalReaction:
                 "left side should equal the number of atoms of that species on the "
                 "right side. "
             )
+
+    @cached_property
+    def standard_enthalpy_change(self) -> Optional[MolarEnergy]:
+        """
+        Enthalpy change of reaction at standard conditions (25 Celcius, 1 bar).
+        """
+        diff = MolarEnergy(0)
+
+        for factor in self.products:
+            if factor.substance.standard_formation_properties is None:
+                return None
+
+            diff += (
+                factor.stoichiometric_coefficient
+                * factor.substance.standard_formation_properties.enthalpy
+            )
+
+        for factor in self.reactants:
+            if factor.substance.standard_formation_properties is None:
+                return None
+
+            diff -= (
+                factor.stoichiometric_coefficient
+                * factor.substance.standard_formation_properties.enthalpy
+            )
+
+        return diff
+
+    @cached_property
+    def standard_gibbs_energy_change(self) -> Optional[MolarEnergy]:
+        """
+        Gibbs energy change of reaction at standard conditions (25 Celcius, 1 bar).
+        """
+        diff = MolarEnergy(0)
+
+        for factor in self.products:
+            if factor.substance.standard_formation_properties is None:
+                return None
+
+            diff += (
+                factor.stoichiometric_coefficient
+                * factor.substance.standard_formation_properties.gibbs_energy
+            )
+
+        for factor in self.reactants:
+            if factor.substance.standard_formation_properties is None:
+                return None
+
+            diff -= (
+                factor.stoichiometric_coefficient
+                * factor.substance.standard_formation_properties.gibbs_energy
+            )
+
+        return diff
+
+    @cached_property
+    def standard_entropy_change(self) -> Optional[Entropy]:
+        """
+        Entropy change of reaction at standard conditions (25 Celcius, 1 bar).
+        """
+        diff = Entropy(0)
+
+        for factor in self.products:
+            if factor.substance.standard_entropy is None:
+                return None
+
+            diff += (
+                factor.stoichiometric_coefficient * factor.substance.standard_entropy
+            )
+
+        for factor in self.reactants:
+            if factor.substance.standard_entropy is None:
+                return None
+
+            diff -= (
+                factor.stoichiometric_coefficient * factor.substance.standard_entropy
+            )
+
+        return diff
 
     def _parse_reactants(self):
         if isinstance(
