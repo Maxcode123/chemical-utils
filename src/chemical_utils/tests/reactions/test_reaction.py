@@ -3,6 +3,7 @@ from unittest import TestSuite, TextTestRunner
 from unittest_extensions import args
 
 from chemical_utils.reactions.reaction import ChemicalReaction
+from chemical_utils.properties.properties import MolarEnergy, Entropy
 from chemical_utils.tests.data import (
     TESTIUM,
     TESTIUM2,
@@ -10,6 +11,8 @@ from chemical_utils.tests.data import (
     PYTHONIUM3,
     TS_PY,
     TS2_PY3,
+    reaction_1,
+    reaction_2,
 )
 from chemical_utils.tests.utils import def_load_tests, add_to
 from chemical_utils.tests.reactions.reaction_utils import TestReaction
@@ -96,3 +99,45 @@ class TestChemicalReactionInit(TestReaction):
     @args({"reactants": TS2_PY3, "products": TESTIUM + PYTHONIUM3})
     def test_compound_to_element_and_tuple_unbalanced(self):
         self.assert_unbalanced_reaction()
+
+
+@add_to(reaction_test_suite)
+class ChemicalReactionStandardEnthalpyChange(TestReaction):
+    def subject(self, reaction):
+        return reaction.standard_enthalpy_change
+
+    @args({"reaction": reaction_1})
+    def test_with_registered_compounds_reaction(self):
+        self.assertResult(MolarEnergy(100))
+
+    @args({"reaction": reaction_2})
+    def test_with_unregistered_compounds_reaction(self):
+        self.assertResultIs(None)
+
+
+@add_to(reaction_test_suite)
+class ChemicalReactionStandardGibbsEnergyChange(TestReaction):
+    def subject(self, reaction):
+        return reaction.standard_gibbs_energy_change
+
+    @args({"reaction": reaction_1})
+    def test_with_registered_compounds_reaction(self):
+        self.assertResult(MolarEnergy(200))
+
+    @args({"reaction": reaction_2})
+    def test_with_unregistered_compounds_reaction(self):
+        self.assertResultIs(None)
+
+
+@add_to(reaction_test_suite)
+class ChemicalReactionStandardEntropy(TestReaction):
+    def subject(self, reaction):
+        return reaction.standard_entropy_change
+
+    @args({"reaction": reaction_1})
+    def test_with_registered_compounds_reaction(self):
+        self.assertResult(Entropy(105))
+
+    @args({"reaction": reaction_2})
+    def test_with_unregistered_compounds_reaction(self):
+        self.assertResultIs(None)

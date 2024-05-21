@@ -1,4 +1,7 @@
+from property_utils.units import *
+
 from chemical_utils.substances import *
+from chemical_utils.reactions.constants import STEAM_METHANE_REFORMING
 from chemical_utils.tests.base import TestBase
 
 from chemical_utils.properties.properties import (
@@ -6,6 +9,7 @@ from chemical_utils.properties.properties import (
     Pressure,
     MolarVolume,
     MolarEnergy,
+    Entropy,
 )
 
 
@@ -104,4 +108,25 @@ class TestChemicalSubstanceProperties(TestApi):
         self.assertEqual(
             METHANE.standard_formation_properties.gibbs_energy,
             MolarEnergy(-5.049e7),
+        )
+
+
+class TestChemicalReactionProperties(TestApi):
+    def test_standard_enthalpy_change(self):
+        self.assertTrue(
+            STEAM_METHANE_REFORMING.standard_enthalpy_change.eq(
+                MolarEnergy(205.804, KILO_JOULE / MOL)
+            ),
+        )
+
+    def test_standard_gibbs_energy_change(self):
+        self.assertTrue(
+            STEAM_METHANE_REFORMING.standard_gibbs_energy_change.eq(
+                MolarEnergy(141.93, KILO_JOULE / MOL)
+            ),
+        )
+
+    def test_standard_entropy_change(self):
+        self.assertTrue(
+            STEAM_METHANE_REFORMING.standard_entropy_change.eq(Entropy(214275))
         )
