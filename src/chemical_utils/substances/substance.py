@@ -15,10 +15,12 @@ from chemical_utils.properties.properties import (
     CriticalProperties,
     Entropy,
 )
+from chemical_utils.properties.coefficients import ThermalCapacityCoefficient
 from chemical_utils.properties.registry import (
     get_critical_properties,
     get_standard_formation_properties,
     get_standard_entropy,
+    get_thermal_capacity_coefficients,
 )
 
 
@@ -66,6 +68,16 @@ class ChemicalSubstance(Protocol):
         Critical temperature, pressure and volume.
         """
         return get_critical_properties(self)
+
+    @property
+    def thermal_capacity_coefficients(self) -> Optional[ThermalCapacityCoefficient]:
+        """
+        Thermal capacity coefficients of the equation:
+        Cp = A + B*T + C*(T^2) + D/(T^2)
+
+        Thermal capacity is calculated in cal/mol/K.
+        """
+        return get_thermal_capacity_coefficients(self)
 
     def elements(self) -> Iterator["ChemicalElement"]:
         """
