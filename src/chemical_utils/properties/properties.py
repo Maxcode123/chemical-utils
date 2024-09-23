@@ -1,8 +1,36 @@
+from typing import List
 from dataclasses import dataclass
 
 from property_utils.properties import ValidatedProperty, Property, p
 from property_utils.exceptions import PropertyValidationError
 from property_utils.units import *  # pylint: disable=unused-wildcard-import
+
+
+@dataclass(frozen=True)
+class Conditions:
+    """
+    A list of properties that defines the conditions of some calculation, etc.
+    """
+
+    properties: List[Property]
+
+
+class NonDimensionalProperty(Property):
+    """
+    Property without units.
+    """
+
+    default_units = NON_DIMENSIONAL
+
+
+@dataclass
+class EquilibriumConstant:
+    """
+    Equilibrium constant at certain conditions.
+    """
+
+    value: NonDimensionalProperty
+    conditions: Conditions
 
 
 class Temperature(ValidatedProperty):
