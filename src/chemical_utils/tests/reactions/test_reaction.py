@@ -3,7 +3,7 @@ from unittest import TestSuite, TextTestRunner
 from unittest_extensions import args
 
 from chemical_utils.reactions.reaction import ChemicalReaction
-from chemical_utils.properties.properties import MolarEnergy, Entropy
+from chemical_utils.properties.properties import MolarEnergy, Entropy, Temperature
 from chemical_utils.tests.data import (
     TESTIUM,
     TESTIUM2,
@@ -13,6 +13,7 @@ from chemical_utils.tests.data import (
     TS2_PY3,
     reaction_1,
     reaction_2,
+    reaction_3,
 )
 from chemical_utils.tests.utils import def_load_tests, add_to
 from chemical_utils.tests.reactions.reaction_utils import TestReaction
@@ -102,7 +103,7 @@ class TestChemicalReactionInit(TestReaction):
 
 
 @add_to(reaction_test_suite)
-class ChemicalReactionStandardEnthalpyChange(TestReaction):
+class TestChemicalReactionStandardEnthalpyChange(TestReaction):
     def subject(self, reaction):
         return reaction.standard_enthalpy_change
 
@@ -116,7 +117,7 @@ class ChemicalReactionStandardEnthalpyChange(TestReaction):
 
 
 @add_to(reaction_test_suite)
-class ChemicalReactionStandardGibbsEnergyChange(TestReaction):
+class TestChemicalReactionStandardGibbsEnergyChange(TestReaction):
     def subject(self, reaction):
         return reaction.standard_gibbs_energy_change
 
@@ -130,7 +131,7 @@ class ChemicalReactionStandardGibbsEnergyChange(TestReaction):
 
 
 @add_to(reaction_test_suite)
-class ChemicalReactionStandardEntropy(TestReaction):
+class TestChemicalReactionStandardEntropy(TestReaction):
     def subject(self, reaction):
         return reaction.standard_entropy_change
 
@@ -141,3 +142,13 @@ class ChemicalReactionStandardEntropy(TestReaction):
     @args({"reaction": reaction_2})
     def test_with_unregistered_compounds_reaction(self):
         self.assertResultIs(None)
+
+
+@add_to(reaction_test_suite)
+class TestChemicalReactionEquilibriumConstant(TestReaction):
+    def subject(self, reaction, temperature):
+        return reaction._calculate_equilibrium_constant(temperature)
+
+    @args({"reaction": reaction_3, "temperature": Temperature(1500)})
+    def test_with_registered_compounds_reaction(self):
+        self.assertResultIsNot(None)
