@@ -33,6 +33,14 @@ create_thermal_capacity_coefficients(
     PYTHONIUM3, ThermalCapacityCoefficient(A=8.22, B=0.00015, C=0.0000034, D=0)
 )
 
+
+create_standard_formation_properties(TS_PY, MolarEnergy(50), MolarEnergy(100))
+create_standard_entropy(TS_PY, Entropy(100))
+create_thermal_capacity_coefficients(
+    TS_PY, ThermalCapacityCoefficient(A=10.34, B=0.00274, C=0, D=-195500)
+)
+
+
 create_standard_formation_properties(TS2_PY3, MolarEnergy(100), MolarEnergy(200))
 create_standard_entropy(TS2_PY3, Entropy(200))
 create_thermal_capacity_coefficients(
@@ -41,3 +49,4 @@ create_thermal_capacity_coefficients(
 
 reaction_1 = r(TESTIUM2 + PYTHONIUM3, TS2_PY3)
 reaction_2 = r(TESTIUM + PYTHONIUM, TS_PY)
+reaction_3 = r(4 * TESTIUM2 + 3 * PYTHONIUM3, TS2_PY3 + 6 * TS_PY)
