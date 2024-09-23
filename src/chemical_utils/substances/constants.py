@@ -15,10 +15,12 @@ from chemical_utils.properties.properties import (
     MolarEnergy,
     Entropy,
 )
+from chemical_utils.properties.coefficients import ThermalCapacityCoefficient
 from chemical_utils.properties.registry import (
     create_critical_properties,
     create_standard_formation_properties,
     create_standard_entropy,
+    create_thermal_capacity_coefficients,
 )
 
 __all__ = [
@@ -111,7 +113,16 @@ def _s(value: float, unit: CompositeDimension = JOULE / KILO_MOL / KELVIN) -> En
     return Entropy(value, unit)
 
 
-def _element(  # pylint: disable=too-many-arguments
+def _c(  # pylint: disable=invalid-name
+    A: float = 0,
+    B: float = 0,
+    C: float = 0,
+    D: float = 0,
+) -> ThermalCapacityCoefficient:
+    return ThermalCapacityCoefficient(A=A, B=B, C=C, D=D)
+
+
+def _element(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     atomic_number: int,
     atomic_mass: float,
     symbol: str,
@@ -143,7 +154,7 @@ def _element(  # pylint: disable=too-many-arguments
     return element
 
 
-def _compound(  # pylint: disable=too-many-arguments
+def _compound(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     components: Iterable[ChemicalCompoundComponent],
     critical_temperature: Optional[Temperature] = None,
     critical_pressure: Optional[Pressure] = None,
@@ -151,6 +162,7 @@ def _compound(  # pylint: disable=too-many-arguments
     standard_formation_enthalpy: Optional[MolarEnergy] = None,
     standard_formation_gibbs_energy: Optional[MolarEnergy] = None,
     standard_entropy: Optional[Entropy] = None,
+    thermal_capacity_coefficients: Optional[ThermalCapacityCoefficient] = None,
 ) -> ChemicalCompound:
     compound = ChemicalCompound(*components)
 
@@ -173,6 +185,9 @@ def _compound(  # pylint: disable=too-many-arguments
 
     if standard_entropy is not None:
         create_standard_entropy(compound, standard_entropy)
+
+    if thermal_capacity_coefficients is not None:
+        create_thermal_capacity_coefficients(compound, thermal_capacity_coefficients)
 
     return compound
 
@@ -237,7 +252,14 @@ HAFNIUM = _element(72, 178.49, "Hf")
 TANTALUM = _element(73, 180.9479, "Ta")
 
 HYDROGEN2 = _compound(
-    [HYDROGEN * 2], _t(33.19), _p(13.13), _v(0.064147), _e(0), _e(0), _s(1.30571e5)
+    [HYDROGEN * 2],
+    _t(33.19),
+    _p(13.13),
+    _v(0.064147),
+    _e(0),
+    _e(0),
+    _s(1.30571e5),
+    _c(6.62, 0.0081),
 )
 OXYGEN2 = _compound(
     [OXYGEN * 2], _t(154.58), _p(50.43), _v(0.0734), _e(0), _e(0), _s(2.05043e5)
@@ -250,6 +272,7 @@ WATER = _compound(
     _e(-24.1814e7),
     _e(-22.859e7),
     _s(1.88724e5),
+    _c(8.22, 0.00015, 0.00000134),
 )
 CARBON_MONOXIDE = _compound(
     [CARBON, OXYGEN],
@@ -259,6 +282,7 @@ CARBON_MONOXIDE = _compound(
     _e(-11.053e7),
     _e(-13.715e7),
     _s(1.97556e5),
+    _c(6.60, 0.00120),
 )
 CARBON_DIOXIDE = _compound(
     [CARBON, OXYGEN * 2],
@@ -268,6 +292,7 @@ CARBON_DIOXIDE = _compound(
     _e(-39.351e7),
     _e(-39.437e7),
     _s(2.13677e5),
+    _c(10.34, 0.00274, 0, -195500),
 )
 METHANE = _compound(
     [CARBON, HYDROGEN * 4],
@@ -277,5 +302,6 @@ METHANE = _compound(
     _e(-7.452e7),
     _e(-5.049e7),
     _s(1.8627e5),
+    _c(5.34, 0.0115),
 )
 # NOTE: don't forget to add the compound to the __all__ list

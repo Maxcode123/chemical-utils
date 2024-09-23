@@ -10,6 +10,9 @@ from chemical_utils.properties.properties import (
     FormationProperties,
     Entropy,
 )
+from chemical_utils.properties.coefficients import (
+    ThermalCapacityCoefficient,
+)
 
 
 def create_critical_properties(
@@ -75,6 +78,28 @@ def get_standard_entropy(substance) -> Optional[Entropy]:
     return _standard_entropies.get(substance, None)
 
 
+def create_thermal_capacity_coefficients(
+    substance, coefficient: ThermalCapacityCoefficient
+) -> ThermalCapacityCoefficient:
+    """
+    Create thermal capacity coefficients of a chemical substance.
+
+    Exisintg thermal capacity coefficient can be overriden with this function.
+    """
+    _thermal_capacity_coefficient[substance] = coefficient
+    return _thermal_capacity_coefficient[substance]
+
+
+def get_thermal_capacity_coefficients(
+    substance,
+) -> Optional[ThermalCapacityCoefficient]:
+    """
+    Get the thermal capacity coefficient of a chemical substance. Returns None if the
+    coefficient have not been created for the given substance.
+    """
+    return _thermal_capacity_coefficient.get(substance, None)
+
+
 # ChemicalSubstance cannot be imported here because of circular import. Use this alias
 # in this module.
 ChemicalSubstanceAlias: TypeAlias = Any
@@ -84,3 +109,7 @@ _critical_properties: Dict[ChemicalSubstanceAlias, CriticalProperties] = {}
 _standard_formation_properties: Dict[ChemicalSubstanceAlias, FormationProperties] = {}
 
 _standard_entropies: Dict[ChemicalSubstanceAlias, Entropy] = {}
+
+_thermal_capacity_coefficient: Dict[
+    ChemicalSubstanceAlias, ThermalCapacityCoefficient
+] = {}
