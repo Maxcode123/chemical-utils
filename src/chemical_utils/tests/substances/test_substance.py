@@ -18,7 +18,10 @@ from chemical_utils.tests.data import (
     TESTIUM2,
     ANACONDIUM,
 )
-from chemical_utils.tests.substances.substance_utils import TestSubstances
+from chemical_utils.tests.substances.substance_utils import (
+    TestSubstances,
+    TestChemicalReactionOperand,
+)
 
 # aliases used for testing
 f = ChemicalReactionFactor
@@ -467,3 +470,57 @@ class TestChemicalReactionOperandIteration(TestSubstances):
     @args({"operand": op([f(TS_PY_AN)])})
     def test_with_compound(self):
         self.assertResultList([f(TS_PY_AN)])
+
+
+@add_to(substances_test_suite)
+class TestChemicalReactionOperandAdd(TestChemicalReactionOperand):
+    produced_type = ChemicalReactionOperand
+
+    def subject(self, operand_1, operand_2):
+        return operand_1.add(operand_2)
+
+    @args({"operand_1": op([(f(TESTIUM))]), "operand_2": op([f(TESTIUM)])})
+    def test_same_single_substances(self):
+        self.assert_operand(f(TESTIUM, 2))
+
+    @args(
+        {"operand_1": op([f(TESTIUM), f(PYTHONIUM3, 3)]), "operand_2": op([f(TESTIUM)])}
+    )
+    def test_same_substances(self):
+        self.assert_operand(f(TESTIUM, 2), f(PYTHONIUM3, 3))
+
+    @args({"operand_1": op([f(TESTIUM, 3)]), "operand_2": op([f(PYTHONIUM, 2)])})
+    def test_different_substances(self):
+        self.assert_operand(f(TESTIUM, 3), f(PYTHONIUM, 2))
+
+    @args({"operand_1": op([f(TESTIUM)]), "operand_2": op([f(TESTIUM2)])})
+    def test_same_element_different_substance(self):
+        self.assert_operand(f(TESTIUM), f(TESTIUM2))
+
+
+@add_to(substances_test_suite)
+class TestChemicalReactionOperandSubtract(TestChemicalReactionOperand):
+    produced_type = ChemicalReactionOperand
+
+    def subject(self, operand_1, operand_2):
+        return operand_1.subtract(operand_2)
+
+    @args({"operand_1": op([f(TESTIUM)]), "operand_2": op([f(PYTHONIUM)])})
+    def test_subtract_non_existent_factors(self):
+        self.assert_raises_subtraction_error()
+
+    @args({"operand_1": op([f(TESTIUM)]), "operand_2": op([f(TESTIUM, 2)])})
+    def test_bigger_stoichiometric_coefficient(self):
+        self.assert_raises_subtraction_error()
+
+    @args({"operand_1": op([f(TESTIUM, 2)]), "operand_2": op([f(TESTIUM, 2)])})
+    def test_same_stoichiometric_coefficient(self):
+        self.assert_operand()
+
+    @args({"operand_1": op([f(TESTIUM, 3)]), "operand_2": op([f(TESTIUM, 2)])})
+    def test_existent_factor(self):
+        self.assert_operand(f(TESTIUM))
+
+    @args({"operand_1": op([f(TESTIUM), f(PYTHONIUM)]), "operand_2": op([f(TESTIUM)])})
+    def test_same_stoichiometric_coefficient_more_factors(self):
+        self.assert_operand(f(PYTHONIUM))

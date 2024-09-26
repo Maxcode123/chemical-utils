@@ -10,6 +10,7 @@ from chemical_utils.exceptions.base import (
     ChemicalUtilsTypeError,
     ChemicalUtilsValueError,
 )
+from chemical_utils.exceptions.substances import ChemicalReactionOperandSubtractionError
 from chemical_utils.properties.properties import (
     FormationProperties,
     CriticalProperties,
@@ -315,6 +316,78 @@ class ChemicalReactionOperand:
     """
 
     factors: List[ChemicalReactionFactor]
+
+    def add(self, operand: "ChemicalReactionOperand") -> "ChemicalReactionOperand":
+        """
+        Create a new operand by adding the chemical reaction factors in this operand to
+        the factors of the given operand.
+        """
+        _factors = dict(
+            {
+                (factor.substance, factor.stoichiometric_coefficient)
+                for factor in self.factors
+            }
+        )
+
+        for other_factor in operand.factors:
+            if other_factor.substance in _factors.keys():
+                _factors[other_factor.substance] += (
+                    other_factor.stoichiometric_coefficient
+                )
+            else:
+                _factors[other_factor.substance] = (
+                    other_factor.stoichiometric_coefficient
+                )
+
+        operand = ChemicalReactionOperand(
+            [ChemicalReactionFactor(s, c) for s, c in _factors.items()]
+        )
+
+        return operand
+
+    def subtract(self, operand: "ChemicalReactionOperand") -> "ChemicalReactionOperand":
+        """
+        Subtract the factors of the given operand from the chemical reaction factors
+        of this operand.
+
+        Raises exceptions.substances.ChemicalReactionOperandSubtractionError
+        """
+        _factors = dict(
+            {
+                (factor.substance, factor.stoichiometric_coefficient)
+                for factor in self.factors
+            }
+        )
+
+        for other_factor in operand.factors:
+            if other_factor.substance not in _factors.keys():
+                raise ChemicalReactionOperandSubtractionError(
+                    f"cannot subtract {operand} from {self}; {other_factor} is not "
+                    "present in the minuend factors. "
+                )
+            if (
+                other_factor.stoichiometric_coefficient
+                > _factors[other_factor.substance]
+            ):
+                raise ChemicalReactionOperandSubtractionError(
+                    f"cannot subtract {operand} from {self}; {other_factor} has greater"
+                    " stoichiometric coefficient that the minuend factor. "
+                )
+            if (
+                other_factor.stoichiometric_coefficient
+                == _factors[other_factor.substance]
+            ):
+                _factors.pop(other_factor.substance)
+            else:
+                _factors[other_factor.substance] -= (
+                    other_factor.stoichiometric_coefficient
+                )
+
+        operand = ChemicalReactionOperand(
+            [ChemicalReactionFactor(s, c) for s, c in _factors.items()]
+        )
+
+        return operand
 
     def __add__(self, other: ChemicalReactionFactor) -> "ChemicalReactionOperand":
         if isinstance(other, (ChemicalElement, ChemicalElementTuple, ChemicalCompound)):
