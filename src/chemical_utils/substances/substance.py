@@ -118,7 +118,7 @@ class ChemicalSubstance(Protocol):
         return ChemicalReactionFactor(self, coeff)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=True)
 class ChemicalElement(ChemicalSubstance):
     """
     Element of the periodic table.
@@ -174,7 +174,7 @@ class ChemicalElement(ChemicalSubstance):
         return self.symbol
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=True)
 class ChemicalElementTuple(ChemicalSubstance):
     """
     Container for a multitude of elements with the same atom.
@@ -208,7 +208,7 @@ class ChemicalElementTuple(ChemicalSubstance):
 ChemicalCompoundComponent: TypeAlias = Union[ChemicalElement, ChemicalElementTuple]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=True)
 class ChemicalCompound(ChemicalSubstance):
     """
     A chemical compound can contain any number of chemical components.
