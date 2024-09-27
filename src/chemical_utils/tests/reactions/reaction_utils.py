@@ -1,7 +1,10 @@
 from typing import Any
 
 from chemical_utils.tests.base import TestBase
-from chemical_utils.exceptions.reactions.reaction import UnbalancedChemicalReactionError
+from chemical_utils.exceptions.reactions.reaction import (
+    UnbalancedChemicalReactionError,
+    ChemicalReactionSubtractionError,
+)
 from chemical_utils.substances.substance import (
     ChemicalReactionFactor,
     ChemicalReactionOperand,
@@ -28,3 +31,6 @@ class TestReaction(TestBase):
 
         self.assertCountEqual(self.result().reactants.factors, reactants.factors)
         self.assertCountEqual(self.cachedResult().products.factors, products.factors)
+
+    def assert_subtraction_error(self):
+        self.assertResultRaises(ChemicalReactionSubtractionError)
