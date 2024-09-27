@@ -152,3 +152,25 @@ class TestChemicalReactionEquilibriumConstant(TestReaction):
     @args({"reaction": reaction_3, "temperature": Temperature(1500)})
     def test_with_registered_compounds_reaction(self):
         self.assertResultIsNot(None)
+
+
+@add_to(reaction_test_suite)
+class TestChemicalReactionAddition(TestReaction):
+    produced_type = ChemicalReaction
+
+    def subject(self, reaction_1, reaction_2):
+        return reaction_1 + reaction_2
+
+    @args({"reaction_1": reaction_1, "reaction_2": reaction_1})
+    def test_same_reaction(self):
+        self.assert_reaction(2 * TESTIUM2 + 2 * PYTHONIUM3, 2 * TS2_PY3)
+
+    @args({"reaction_1": reaction_1, "reaction_2": reaction_2})
+    def test_different_reactions(self):
+        self.assert_reaction(
+            TESTIUM + TESTIUM2 + PYTHONIUM + PYTHONIUM3, TS_PY + TS2_PY3
+        )
+
+    @args({"reaction_1": reaction_1, "reaction_2": 2 * TESTIUM})
+    def test_add_substance(self):
+        self.assert_type_error()

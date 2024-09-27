@@ -483,3 +483,19 @@ class ChemicalReaction:
 
     def __str__(self) -> str:
         return f"{self.reactants} -> {self.products}"
+
+    def __add__(self, other: "ChemicalReaction") -> "ChemicalReaction":
+        if not isinstance(other, ChemicalReaction):
+            raise ChemicalUtilsTypeError(
+                f"cannot add {other} to a chemical reaction; only a chemical reaction can"
+                " be added to chemical reactions. "
+            )
+
+        reactants = self.reactants.add(other.reactants)
+        products = self.products.add(other.products)
+        reaction = ChemicalReaction(reactants, products)
+
+        return reaction
+
+    def __radd__(self, other: "ChemicalReaction") -> "ChemicalReaction":
+        return self.__add__(other)
