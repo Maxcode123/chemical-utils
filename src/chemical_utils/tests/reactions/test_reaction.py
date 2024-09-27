@@ -4,6 +4,7 @@ from unittest_extensions import args
 
 from chemical_utils.reactions.reaction import ChemicalReaction
 from chemical_utils.properties.properties import MolarEnergy, Entropy, Temperature
+from chemical_utils.substances.substance import ChemicalReactionOperand
 from chemical_utils.tests.data import (
     TESTIUM,
     TESTIUM2,
@@ -152,3 +153,49 @@ class TestChemicalReactionEquilibriumConstant(TestReaction):
     @args({"reaction": reaction_3, "temperature": Temperature(1500)})
     def test_with_registered_compounds_reaction(self):
         self.assertResultIsNot(None)
+
+
+@add_to(reaction_test_suite)
+class TestChemicalReactionAddition(TestReaction):
+    produced_type = ChemicalReaction
+
+    def subject(self, reaction_1, reaction_2):
+        return reaction_1 + reaction_2
+
+    @args({"reaction_1": reaction_1, "reaction_2": reaction_1})
+    def test_same_reaction(self):
+        self.assert_reaction(2 * TESTIUM2 + 2 * PYTHONIUM3, 2 * TS2_PY3)
+
+    @args({"reaction_1": reaction_1, "reaction_2": reaction_2})
+    def test_different_reactions(self):
+        self.assert_reaction(
+            TESTIUM + TESTIUM2 + PYTHONIUM + PYTHONIUM3, TS_PY + TS2_PY3
+        )
+
+    @args({"reaction_1": reaction_1, "reaction_2": 2 * TESTIUM})
+    def test_add_substance(self):
+        self.assert_type_error()
+
+
+@add_to(reaction_test_suite)
+class TestChemicalReactionSubtraction(TestReaction):
+    produced_type = ChemicalReaction
+
+    def subject(self, reaction_1, reaction_2):
+        return reaction_1 - reaction_2
+
+    @args({"reaction_1": reaction_1, "reaction_2": reaction_2})
+    def test_non_subreaction(self):
+        self.assert_subtraction_error()
+
+    @args({"reaction_1": reaction_3, "reaction_2": reaction_1})
+    def test_subreaction(self):
+        self.assert_reaction(3 * TESTIUM2 + 2 * PYTHONIUM3, 6 * TS_PY)
+
+    @args({"reaction_1": reaction_1, "reaction_2": reaction_1})
+    def test_same_reaction(self):
+        self.assert_reaction(ChemicalReactionOperand([]), ChemicalReactionOperand([]))
+
+    @args({"reaction_1": reaction_1, "reaction_2": TS2_PY3})
+    def test_with_substance(self):
+        self.assert_type_error()

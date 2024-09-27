@@ -16,8 +16,15 @@ from chemical_utils.substances.substance import (
     ChemicalReactionFactor,
 )
 from chemical_utils.exceptions.base import ChemicalUtilsTypeError
-from chemical_utils.exceptions.reactions import UnbalancedChemicalReactionError
-from chemical_utils.exceptions.substances import MissingDataError, InvalidDataError
+from chemical_utils.exceptions.reactions import (
+    UnbalancedChemicalReactionError,
+    ChemicalReactionSubtractionError,
+)
+from chemical_utils.exceptions.substances import (
+    MissingDataError,
+    InvalidDataError,
+    ChemicalReactionOperandSubtractionError,
+)
 from chemical_utils.properties.properties import (
     MolarEnergy,
     Entropy,
@@ -483,3 +490,39 @@ class ChemicalReaction:
 
     def __str__(self) -> str:
         return f"{self.reactants} -> {self.products}"
+
+    def __add__(self, other: "ChemicalReaction") -> "ChemicalReaction":
+        if not isinstance(other, ChemicalReaction):
+            raise ChemicalUtilsTypeError(
+                f"cannot add {other} to a chemical reaction; only a chemical reaction can"
+                " be added to chemical reactions. "
+            )
+
+        reactants = self.reactants.add(other.reactants)
+        products = self.products.add(other.products)
+        reaction = ChemicalReaction(reactants, products)
+
+        return reaction
+
+    def __radd__(self, other: "ChemicalReaction") -> "ChemicalReaction":
+        return self.__add__(other)
+
+    def __sub__(self, other: "ChemicalReaction") -> "ChemicalReaction":
+        if not isinstance(other, ChemicalReaction):
+            raise ChemicalUtilsTypeError(
+                f"cannot subtract {other} from a chemical reaction; only a chemical "
+                "reaction can be subtracted from chemical reactions. "
+            )
+
+        try:
+            reactants = self.reactants.subtract(other.reactants)
+            products = self.products.subtract(other.products)
+        except ChemicalReactionOperandSubtractionError:
+            raise ChemicalReactionSubtractionError(
+                f"cannot subtract {other} from {self}; {other} must be a subreaction of "
+                f"{self}. "
+            ) from None
+
+        reaction = ChemicalReaction(reactants, products)
+
+        return reaction
